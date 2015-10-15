@@ -1,0 +1,7 @@
+E:\德国风浪场\西太平洋	http://www.wetterzentrale.de/pics/Roaswav001.png
+E:\德国风浪场\印度洋	http://www.wetterzentrale.de/pics/Rsaswav001.png
+E:\德国风浪场\北大西洋	http://www.wetterzentrale.de/pics/Reurwav001.png
+E:\德国风浪场\北美	http://www.wetterzentrale.de/pics/Rnamwav001.png
+E:\德国风浪场\南美	http://www.wetterzentrale.de/pics/Rsamwav001.png
+E:\德国风浪场\非洲	http://www.wetterzentrale.de/pics/Rafrwav001.png
+E:\德国风浪场\澳洲	http://www.wetterzentrale.de/pics/Rauswav001.png

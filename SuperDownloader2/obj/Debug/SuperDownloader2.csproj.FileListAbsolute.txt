@@ -1,0 +1,9 @@
+E:\C#Project\SuperDownloader2\SuperDownloader2\bin\Debug\SuperDownloader2.exe
+E:\C#Project\SuperDownloader2\SuperDownloader2\bin\Debug\SuperDownloader2.pdb
+E:\C#Project\SuperDownloader2\SuperDownloader2\obj\Debug\SuperDownloader2.Form1.resources
+E:\C#Project\SuperDownloader2\SuperDownloader2\obj\Debug\SuperDownloader2.Form2.resources
+E:\C#Project\SuperDownloader2\SuperDownloader2\obj\Debug\SuperDownloader2.Properties.Resources.resources
+E:\C#Project\SuperDownloader2\SuperDownloader2\obj\Debug\SuperDownloader2.csproj.GenerateResource.Cache
+E:\C#Project\SuperDownloader2\SuperDownloader2\obj\Debug\SuperDownloader2.exe.licenses
+E:\C#Project\SuperDownloader2\SuperDownloader2\obj\Debug\SuperDownloader2.exe
+E:\C#Project\SuperDownloader2\SuperDownloader2\obj\Debug\SuperDownloader2.pdb
