@@ -123,7 +123,14 @@ namespace SuperDownloader2
                     {
                         if (!Directory.Exists(mytable.Rows[i][j].ToString()))
                         {
-                            return "行" + (i + 1) + "列" + (j + 1) + mytable.Rows[i][i].ToString()+"：该目录不存在";
+                            try
+                            {
+                                Directory.CreateDirectory(mytable.Rows[i][j].ToString());
+                            }
+                            catch
+                            {
+                                return "行" + (i + 1) + "列" + (j + 1) + mytable.Rows[i][i].ToString() + "：该目录不存在";
+                            }
                         }
                     }
                 }

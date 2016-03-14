@@ -18,6 +18,7 @@ namespace SuperDownloader2
         private string timeStr = "";//保存下载时间节点设置
         private int hour_now = -1;//当前小时
         private int hour_pre = -1;
+        
         bool SettingOK = false;//下载设置是否完成
         Thread myThread;
         
@@ -32,10 +33,25 @@ namespace SuperDownloader2
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            timer2.Start();
+            
             hour_now = DateTime.Now.Hour;
-            Control.CheckForIllegalCrossThreadCalls = false;　
-            myThread = new Thread(new ThreadStart(DownData));
+            Control.CheckForIllegalCrossThreadCalls = false;
+            ServicePointManager.DefaultConnectionLimit = 10;//webclient 连接数限制默认是2，修改为10
+
+            //代开软件时自动下载
+            richTextBox1.Text += "开始……\n" + DateTime.Now.ToLongTimeString() + "\n--------------------------------------------------------\n";
+            if (init())
+            {
+                //开始下载
+                if (timer1.Enabled == false)
+                {
+                    timer1.Start();
+                    simpleButton1.Enabled = false;
+                    simpleButton2.Enabled = true;
+                }
+            }
+
+            timer2.Start();
         }
 
         //检查数据
@@ -57,7 +73,14 @@ namespace SuperDownloader2
                     {
                         if (!Directory.Exists(mytable.Rows[i][j].ToString()))
                         {
-                            return "行" + (i + 1) + "列" + (j + 1) + mytable.Rows[i][i].ToString() + "：该目录不存在";
+                            try
+                            {
+                                Directory.CreateDirectory(mytable.Rows[i][j].ToString());
+                            }
+                            catch
+                            {
+                                return "行" + (i + 1) + "列" + (j + 1) + mytable.Rows[i][i].ToString() + "：该目录不存在";
+                            }
                         }
                     }
                 }
@@ -103,8 +126,8 @@ namespace SuperDownloader2
 
         //初始设置
         private bool init()
-        {            
-            if (File.Exists("SaveSetting.txt"))
+        {
+            if (File.Exists(Application.StartupPath + "\\SaveSetting.txt"))
             {
                 mytable = ReadSaveSetting("SaveSetting.txt");
                 for (int i = 0; i < mytable.Rows.Count; i++)
@@ -117,7 +140,7 @@ namespace SuperDownloader2
             }
 
 
-            if (File.Exists("TimeSetting.txt"))
+            if (File.Exists(Application.StartupPath + "\\TimeSetting.txt"))
                 timeStr = ReadTimeSetting("TimeSetting.txt");
             else
             {
@@ -150,8 +173,18 @@ namespace SuperDownloader2
             {
                 if (!File.Exists(receivePath + "\\" + filename))
                 {
-                    client.DownloadFile(URLAddress, receivePath + "\\" + filename);
-                    return "OK";
+                    HttpWebRequest myReq = (HttpWebRequest)WebRequest.Create("http://www.baidu.com/");
+                    HttpWebResponse response = (HttpWebResponse)myReq.GetResponse();
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        client.DownloadFile(URLAddress, receivePath + "\\" + filename);
+                        return "OK";
+                    }
+                    else
+                    {
+                        return "链接出现问题,下载失败";
+                    }                    
+
                 }
                 else
                 {
@@ -220,7 +253,8 @@ namespace SuperDownloader2
                     //显示下载信息
                     if (result == "OK")
                     {
-                        FileInfo inf = new FileInfo(mytable.Rows[i][0].ToString() + "\\" + fileNAM);
+                        string filepath = mytable.Rows[i][0].ToString() + "\\" + fileNAM;
+                        FileInfo inf = new FileInfo(filepath);
                         double filelength = inf.Length / 1024.0;
                         if (filelength > 20)//如果文件过小，则认为文件出错
                         {
@@ -229,12 +263,23 @@ namespace SuperDownloader2
                         }
                         else
                         {
-                            File.Delete(mytable.Rows[i][0].ToString() + "\\" + fileNAM);
-                            richTextBox1.Text += "下载文件错误，10分钟后再次尝试下载！\n";
+                            try
+                            {
+                                File.Delete(filepath);
+                                richTextBox1.Text += "下载文件" + filepath + "错误，10分钟后再次尝试下载！\n";
+                            }
+                            catch
+                            {
+                                continue;
+                            }
+                            
                         }
                     }
                     else
+                    {
                         richTextBox1.Text += "下载失败,请检查链接或网络是否可用！\n" + result;
+                        continue;
+                    }
                     
                     richTextBox1.Select(richTextBox1.TextLength, 0);
                     richTextBox1.ScrollToCaret();
@@ -256,13 +301,11 @@ namespace SuperDownloader2
         //启动
         private void simpleButton1_Click(object sender, EventArgs e)
         {
-            //timer2.Start();
             richTextBox1.Text += "开始……\n" + DateTime.Now.ToLongTimeString() + "\n--------------------------------------------------------\n";
             if (init())
             {
                 //开始下载
                 timer1.Start();
-
                 simpleButton1.Enabled = false;
                 simpleButton2.Enabled = true;
             }
@@ -332,8 +375,11 @@ namespace SuperDownloader2
                         for (int i = 0; i < mytable.Rows.Count; i++)
                             DownLoadMark[i] = false;
                         hour_pre = hour_now;
-                        timer1.Interval = 100;
-                        timer1.Start();
+                        if (timer1.Enabled != true)
+                        {
+                            timer1.Interval = 100;
+                            timer1.Start();
+                        }
                     }
                 }
             }
