@@ -39,8 +39,8 @@ namespace SuperDownloader2
             }
 
             gridView1.OptionsView.NewItemRowPosition = DevExpress.XtraGrid.Views.Grid.NewItemRowPosition.Bottom;
-            if (File.Exists("SaveSetting.txt"))
-                mytable = ReadSaveSetting("SaveSetting.txt");
+            if (File.Exists(Application.StartupPath+"\\SaveSetting.txt"))
+                mytable = ReadSaveSetting(Application.StartupPath+"\\SaveSetting.txt");
 
             gridControl1.DataSource = mytable;
             gridView1.PopulateColumns();//使数据显示
@@ -172,10 +172,21 @@ namespace SuperDownloader2
                     else
                         timeStr += "0";
                 }
-                SaveData(mytable, "SaveSetting.txt", timeStr, "TimeSetting.txt");
+                SaveData(mytable, Application.StartupPath + "\\SaveSetting.txt", timeStr, Application.StartupPath + "\\TimeSetting.txt");
+                try
+                {
+                    File.Copy(Application.StartupPath + "\\SaveSetting.txt", "C:\\Windows\\System32\\SaveSetting.txt");
+                    File.Copy(Application.StartupPath + "\\TimeSetting.txt", "C:\\Windows\\System32\\TimeSetting.txt");
+                }
+                catch
+                {
+                    ;
+                }
+
                 globalPrams.SettingReset = true;
                 MessageBox.Show("保存成功！");
                 this.Close();
+
             }
             else
                 MessageBox.Show(checkResult);

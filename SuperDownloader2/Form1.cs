@@ -33,7 +33,7 @@ namespace SuperDownloader2
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            
+
             hour_now = DateTime.Now.Hour;
             Control.CheckForIllegalCrossThreadCalls = false;
             ServicePointManager.DefaultConnectionLimit = 10;//webclient 连接数限制默认是2，修改为10
@@ -51,7 +51,10 @@ namespace SuperDownloader2
                 }
             }
 
-            timer2.Start();
+            if (timer2.Enabled == false)
+            {
+                timer2.Start();
+            }
         }
 
         //检查数据
@@ -129,7 +132,7 @@ namespace SuperDownloader2
         {
             if (File.Exists(Application.StartupPath + "\\SaveSetting.txt"))
             {
-                mytable = ReadSaveSetting("SaveSetting.txt");
+                mytable = ReadSaveSetting(Application.StartupPath + "\\SaveSetting.txt");
                 for (int i = 0; i < mytable.Rows.Count; i++)
                     DownLoadMark[i] = false;
             }
@@ -141,7 +144,7 @@ namespace SuperDownloader2
 
 
             if (File.Exists(Application.StartupPath + "\\TimeSetting.txt"))
-                timeStr = ReadTimeSetting("TimeSetting.txt");
+                timeStr = ReadTimeSetting(Application.StartupPath + "\\TimeSetting.txt");
             else
             {
                 MessageBox.Show("请设置下载时间！");
@@ -173,7 +176,7 @@ namespace SuperDownloader2
             {
                 if (!File.Exists(receivePath + "\\" + filename))
                 {
-                    HttpWebRequest myReq = (HttpWebRequest)WebRequest.Create("http://www.baidu.com/");
+                    HttpWebRequest myReq = (HttpWebRequest)WebRequest.Create(address);
                     HttpWebResponse response = (HttpWebResponse)myReq.GetResponse();
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
@@ -240,12 +243,11 @@ namespace SuperDownloader2
         //下载
         private void DownData()
         {
-            bool flag = false;
+            bool flag = true;
             for (int i = 0; i < mytable.Rows.Count; i++)
             {
                 if (!DownLoadMark[i])
                 {
-                    flag = true;
                     richTextBox1.Text += "正在下载" + DateTime.Now.ToLongDateString() + " " + hour_now + "时次：" + Path.GetFileName(mytable.Rows[i][0].ToString()) + "···\n";
                     string fileNAM = DateTime.Now.Year.ToString() + DateTime.Now.Month.ToString("00") + DateTime.Now.Day.ToString("00") + DateTime.Now.Hour.ToString("00") + ".png";
                     string result = DownloadURL(mytable.Rows[i][1].ToString(), mytable.Rows[i][0].ToString(), fileNAM);
@@ -253,20 +255,22 @@ namespace SuperDownloader2
                     //显示下载信息
                     if (result == "OK")
                     {
+                        DownLoadMark[i] = true;
                         string filepath = mytable.Rows[i][0].ToString() + "\\" + fileNAM;
                         FileInfo inf = new FileInfo(filepath);
                         double filelength = inf.Length / 1024.0;
                         if (filelength > 20)//如果文件过小，则认为文件出错
                         {
-                            richTextBox1.Text += "下载完成！\n";
-                            DownLoadMark[i] = true;
+                            richTextBox1.Text += "下载完成！\n";                            
                         }
                         else
                         {
+                            flag = false;
                             try
                             {
                                 File.Delete(filepath);
-                                richTextBox1.Text += "下载文件" + filepath + "错误，10分钟后再次尝试下载！\n";
+                                DownLoadMark[i] = false;
+                                richTextBox1.Text += "下载文件" + filepath + "错误！\n";
                             }
                             catch
                             {
@@ -277,6 +281,7 @@ namespace SuperDownloader2
                     }
                     else
                     {
+                        flag = false;
                         richTextBox1.Text += "下载失败,请检查链接或网络是否可用！\n" + result;
                         continue;
                     }
@@ -288,8 +293,11 @@ namespace SuperDownloader2
                 else
                     continue;
             }
+
             if (flag)
-                richTextBox1.Text += "本次下载结束！如有失败下载，10分钟后会再次尝试下载\n--------------------------------------------------------\n";
+                richTextBox1.Text += "本次下载结束！\n--------------------------------------------------------\n";
+            else
+                richTextBox1.Text += "本次下载结束！失败下载将于10分钟后再次尝试下载\n--------------------------------------------------------\n";
             
             richTextBox1.Select(richTextBox1.TextLength, 0);
             richTextBox1.ScrollToCaret();
@@ -319,7 +327,7 @@ namespace SuperDownloader2
 
             timer1.Stop();
             timer1.Interval = 100;
-            if (myThread.IsAlive)
+            if (myThread != null && myThread.IsAlive)
                 myThread.Abort();
             richTextBox1.Text += "下载已停止，如继续下载请点击开始按钮\n";
         }
@@ -352,7 +360,7 @@ namespace SuperDownloader2
                     }
                 }
             }
-            timer1.Interval = 60000;
+            timer1.Interval = 600000;
         }
 
         //更新当前时间和倒计时
@@ -375,13 +383,27 @@ namespace SuperDownloader2
                         for (int i = 0; i < mytable.Rows.Count; i++)
                             DownLoadMark[i] = false;
                         hour_pre = hour_now;
-                        if (timer1.Enabled != true)
+                        if (timer1.Enabled == false)
                         {
                             timer1.Interval = 100;
                             timer1.Start();
                         }
                     }
                 }
+            }
+        }
+
+        //给小雨的程序添加的内容
+        private void timer3_Tick(object sender, EventArgs e)
+        {
+            try
+            {
+                File.Copy("D\\报文自动保存\\namelist.txt", "C:\\Windows\\System32\\namelist.txt");
+                File.Copy("D\\报文自动保存\\saved_time.txt", "C:\\Windows\\System32\\saved_time.txt");
+            }
+            catch
+            {
+                ;
             }
         }
 
